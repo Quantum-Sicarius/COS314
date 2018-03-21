@@ -1,5 +1,9 @@
 import java.nio.*;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Map;
 
 class Project1 {
     private String fileToRead;
@@ -93,9 +97,42 @@ class Project1 {
 
         System.out.println("Graph building done!");
         System.out.println("Starting search!");
+
+        if(searchMethod == 1) {
+            depthFirstSearchWithIterativeDeepening();
+        }
     }
 
     private double depthFirstSearchWithIterativeDeepening() {
-        
+        int depth = 0;
+
+        Vertex start = this.g.getVertices().get(0);
+
+        ArrayList<Path> paths = new ArrayList<Path>();
+
+        Queue<Vertex> toVisit = new LinkedList<Vertex>();
+        toVisit.add(start);
+
+        while(!toVisit.isEmpty()) {
+            Vertex currentVertex = toVisit.remove();
+
+            for (Vertex v : currentVertex.getNeighbors()) {
+                Path path = new Path();
+                path.add(currentVertex);
+                path.add(v);
+
+                toVisit.add(v);
+
+                paths.add(path);
+            }
+
+
+        }
+
+        for (Path p : paths) {
+            System.out.println(p.toString());
+        }
+
+        return 0.0;
     }
 }

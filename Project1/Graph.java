@@ -36,4 +36,8 @@ class Graph {
 
         return Math.sqrt((yd)*(yd) +(xd)*(xd));
     }
+
+    public ArrayList<Vertex> getVertices() {
+        return this.vertices;
+    }
 }

@@ -6,6 +6,8 @@ class Vertex {
     private ArrayList<Edge> edges;
     private Point coordinates;
 
+    public double currentDistanceFromStart = Double.POSITIVE_INFINITY;
+
     public Vertex(String name, double x, double y) {
         this.name = name;
         this.edges = new ArrayList<Edge>();
@@ -38,5 +40,19 @@ class Vertex {
         double yd = this.getCoordinates().getY() - v.getCoordinates().getY();
 
         return Math.sqrt((yd)*(yd) +(xd)*(xd));
+    }
+
+    public ArrayList<Vertex> getNeighbors() {
+        ArrayList<Vertex> neighbors = new ArrayList<Vertex>();
+        for (Edge e : this.edges) {
+            if(e.getVertexA() != this) {
+                neighbors.add(e.getVertexA());
+            }
+            if(e.getVertexB() != this) {
+                neighbors.add(e.getVertexB());
+            }
+        }
+
+        return neighbors;
     }
 }
