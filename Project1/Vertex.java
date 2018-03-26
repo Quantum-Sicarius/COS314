@@ -7,6 +7,7 @@ class Vertex {
     private Point coordinates;
 
     public double currentDistanceFromStart = Double.POSITIVE_INFINITY;
+    public Vertex previousVertex = null;
 
     public Vertex(String name, double x, double y) {
         this.name = name;
@@ -35,11 +36,31 @@ class Vertex {
         this.name = name;
     }
 
+    public boolean hasPreviousVertex() {
+        if(previousVertex != null) {
+            return true;
+        }
+        return false;
+    }
+
     public double getDistanceTo(Vertex v) {
         double xd = this.getCoordinates().getX() - v.getCoordinates().getX();
         double yd = this.getCoordinates().getY() - v.getCoordinates().getY();
 
         return Math.sqrt((yd)*(yd) +(xd)*(xd));
+    }
+
+    public boolean hasEdgeTo(Vertex b) {
+        for (Edge e : this.edges) {
+            if(e.getVertexA() == this && e.getVertexB() == b) {
+                return true;
+            }
+            if(e.getVertexA() == b && e.getVertexB() == this) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public ArrayList<Vertex> getNeighbors() {

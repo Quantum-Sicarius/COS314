@@ -18,7 +18,8 @@ class Graph {
         for (Vertex vA : this.vertices) {
             for (Vertex vB : this.vertices) {
                 // If we are not the same vertex.
-                if(vA != vB) {
+                // And we dont have an edge like this
+                if(vA != vB && !vA.hasEdgeTo(vB)) {
                     Edge e = new Edge(getDistance(vA, vB), vA, vB);
                 }
             }
