@@ -1,5 +1,6 @@
 import java.nio.*;
 import java.util.*;
+import java.math.BigInteger;
 
 class Project1 {
     private String fileToRead;
@@ -177,41 +178,52 @@ class Project1 {
         return perm;
     }
 
-    /*private void bfsRec(ArrayList<Path> p, ) {
-        // Say we are at B and our Q=[CD]
-        Vertex currentVertex = currentQueue.remove();
+    private static long factorial(int number) {
+        long result = 1;
 
-        // Now we must get the permutations of CD
-        ArrayList<Vertex> nextPermutation = new ArrayList<Vertex>(Arrays.asList(currentQueue.toArray()));
-        // This is basically an entire new queue we need to explore
-        ArrayList<ArrayList<Vertex>> permutations = generatePermutations(uniqueNeighbors);
-
-
-    }*/
-
-    /*private void exploreBFS(ArrayList<Path> paths, Path localPath, Vertex currentVertex) {
-        localPath.add(currentVertex);
-        // Now we must get the permutations of CD
-        ArrayList<Vertex> nextPermutation = new ArrayList<Vertex>(Arrays.asList(currentQueue.toArray()));
-        // This is basically an entire new queue we need to explore
-        // New permutations [[CD], [DC]]
-        ArrayList<ArrayList<Vertex>> permutations = generatePermutations(uniqueNeighbors);
-
-        for (ArrayList<Vertex> permutation : permutations) {
-            // For each permutation generate and search.
-            for (Vertex child : permutation) {
-                // Each child is a new path.
-                if (!localPath.currentPath.contains(child)) {
-                    Path childPath = new Path(localPath);
-                    paths.add(childPath);
-                    
-                    
-                }
-            }
+        for (int factor = 2; factor <= number; factor++) {
+            result *= factor;
         }
-    }*/
+
+        return result;
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    private boolean memoryCheck() {
+        // In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes.
+        Long estimatedBytes = (factorial(g.getVertices().size()) * (g.getVertices().size()*(16+16)));
+        Long available = (Runtime.getRuntime().maxMemory());
+        
+
+
+        if(estimatedBytes < 0 || estimatedBytes >= available) {
+            System.out.println("==============================================================");
+            System.out.println("You are attempting a exhuastive search with too little memory!"); 
+            System.out.println("In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes."); 
+            System.out.println("Considering my not so memory efficient implemmentation you will run out of memory and crash!"); 
+            System.out.println("You will be attempting to use over: " + humanReadableByteCount(Math.abs(estimatedBytes), false)); 
+            System.out.println("The JVM only has: " + humanReadableByteCount(Runtime.getRuntime().maxMemory(), false) + " available for this program!"); 
+            System.out.println("==============================================================");
+
+            return false;
+        }
+
+        return true;
+    }
 
     private void breadthFirstSearch() {
+
+        if(!memoryCheck()) {
+            return;
+        }
+
         /*
         A - B
         | \ |
