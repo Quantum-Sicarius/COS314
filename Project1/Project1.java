@@ -110,56 +110,96 @@ class Project1 {
         }
     }
 
-    private Path depthFirstSearch(Vertex start,int depthLimit) {
+    private ArrayList<Path> depthFirstSearch(Vertex start,int depthLimit) {
+        if( depthLimit == 0) {
+            return null;
+        }
+
         // We know our goal is our starting position so all we actually want to do is go through all our nodes.
         int currentDepth = 0;
 
-        Deque<Vertex> toVisit = new LinkedList<Vertex>();
-        toVisit.add(start);
+        Deque<Pair<Path, Vertex>> toVisit = new LinkedList<Pair<Path, Vertex>>();
 
-        ArrayList<Vertex> visited = new ArrayList<Vertex>();
+        ArrayList<Path> paths = new ArrayList<Path>();
+
         Path p = new Path();
+        p.add(start);
+        Path localPath = p;
+
+        Pair<Path, Vertex> startPair = new Pair<Path, Vertex>();
+        startPair.first = p;
+        startPair.second = start;
+
+        toVisit.add(startPair);
 
         while(!toVisit.isEmpty()) {
-            Vertex currentVertex = toVisit.remove();
-            visited.add(currentVertex);
+            Pair<Path, Vertex> currentPair = toVisit.remove();
 
-            p.add(currentVertex);
+            localPath = currentPair.first;
+            Vertex currentVertex = currentPair.second;
 
-            //System.out.println("[DEBUG] Current vertex= " + currentVertex.getName());
+            //System.out.print("PathID: " + localPath.toString() + "\tCurrent vertex " + currentVertex.getName()); 
+            //System.out.println();
 
-            for (Vertex child : currentVertex.getNeighbors()) {
-                //System.out.println("[DEBUG] " + child.getName() + " is a neighbor of: " + currentVertex.getName());
-                if(!visited.contains(child)) {
-                    toVisit.offerFirst(child);
+            if(localPath.currentPath.size() - 1 >= depthLimit) {
+                continue;
+            }
+
+            ArrayList<Vertex> neighbors = currentVertex.getNeighbors();
+            // Each neighbor is a new path.
+            for (Vertex neighbor : neighbors) {
+                // If the neighbor is not in the current path make a new path and add to queue
+                if(!localPath.currentPath.contains(neighbor)) {
+                    Path newPath = new Path(localPath);
+                    newPath.add(neighbor);
+                    paths.add(newPath);
+                    Pair<Path, Vertex> newPair = new Pair<Path, Vertex>();
+                    newPair.first = newPath;
+                    newPair.second = neighbor;
+
+                    toVisit.offerFirst(newPair);
                 }
             }
-            currentDepth++;
-            if(currentDepth == depthLimit+1) {
-                break;
+            
+        }
+
+
+        ArrayList<Path> finalPaths = new ArrayList<Path>();
+
+        for (int i = 0; i < paths.size(); i++) {
+            if(paths.get(i).currentPath.size() - 1 >= depthLimit) {
+                finalPaths.add(paths.get(i));
             }
         }
 
-        if(visited.size() == g.getVertices().size()) {
-            System.out.println("[DEBUG] All nodes explored.");
-            p.complete = true;
-            p.add(start);
-        }
-
-        return p;
+        return finalPaths;
     }
 
     private void depthFirstSearchWithIterativeDeepening() {
+        Vertex start = g.getVertices().get(0);
         for (int i = 1; i < g.getVertices().size(); i++) {
-            Path solution = depthFirstSearch(g.getVertices().get(0), i);
-            if (solution.complete) {
-                // If a Solution has been found.
-                System.out.println("Solution has been found at depth = " + i);
-                System.out.println(solution.toString());
-                System.out.println("Distance for solution = " + solution.getTotalDistance());
+            ArrayList<Path> solutions = depthFirstSearch(start, i);
+            int totalSolutions = 0;
+            for(Path sol: solutions) {
+                if(sol.currentPath.size() == this.g.getVertices().size()) {
+                    totalSolutions++;
+                }
+            }
+            if(totalSolutions > 0) {
+                System.out.println("Found " + totalSolutions + " potential solutions at Depth = " + i);
+
+                Path bestPath = solutions.get(0);
+
+                for(Path sol: solutions) {
+                    if((bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)) > (sol.getTotalDistance() + sol.getLastAdded().getDistanceTo(start))) {
+                        bestPath = sol;
+                    }
+                }
+                System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + (bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)));
+
                 break;
             } else {
-                System.out.println("Solution has not been found at depth = " + i);
+                System.out.println("No solutions have been found yet! Depth = " + i);
             }
         }
 
