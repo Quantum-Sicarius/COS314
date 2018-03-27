@@ -260,9 +260,9 @@ class Project1 {
 
     private void breadthFirstSearch() {
 
-        if(!memoryCheck()) {
+        /*if(!memoryCheck()) {
             return;
-        }
+        }*/
 
         /*
         A - B
@@ -273,83 +273,47 @@ class Project1 {
         Vertex start = g.getVertices().get(0);
         start.currentDistanceFromStart = 0;
 
-        Queue<Pair<Path,Queue<Vertex>>> queuesToVisit = new LinkedList<Pair<Path,Queue<Vertex>>>();
+        Queue<Pair<Path,Vertex>> toVisit = new LinkedList<Pair<Path,Vertex>>();
 
         ArrayList<Path> paths = new ArrayList<Path>();
-        Path bestPath = null;
 
         Path p = new Path();
         p.add(start);
+        Path localPath = p;
 
-        // Seed the queue
-        ArrayList<ArrayList<Vertex>> basePermutations = generatePermutations(start.getNeighbors());
-        for (ArrayList<Vertex> basePermutation : basePermutations) {
-            Pair<Path,Queue<Vertex>> h = new Pair<Path, Queue<Vertex>>();
-            Queue<Vertex> q = new LinkedList<Vertex>();
-            for (Vertex child : basePermutation) {
-                q.add(child);
-            }
-            h.first = p;
-            h.second = q;
-            queuesToVisit.add(h);
-        }
+        Pair<Path, Vertex> startPair = new Pair<Path, Vertex>();
+        startPair.first = p;
+        startPair.second = start;
+
+        toVisit.add(startPair);
         // Now we have a queue with [[BCD],[CDB],[DBC]]
         // Where B, C, D is our second branch
         // so we must deque the first item from each of our queues.
 
-        while(!queuesToVisit.isEmpty()) {
-            Pair<Path,Queue<Vertex>> currentPair = queuesToVisit.remove();
+        while(!toVisit.isEmpty()) {
+            Pair<Path,Vertex> currentPair = toVisit.remove();
 
-            Path localPath = currentPair.first;
-            Queue<Vertex> currentQueue = currentPair.second;
+            localPath = currentPair.first;
+            Vertex currentVertex = currentPair.second;
 
-            /*System.out.print("PathID: " + localPath.toString() + "\tCurrent Queue ["); 
-            for (Vertex v : currentQueue) {
-                System.out.print(v.getName() + ",");
-            }
-            System.out.print("]"); 
-            System.out.println();*/
+            //System.out.print("PathID: " + localPath.toString() + "\tCurrent vertex " + currentVertex.getName()); 
+            //System.out.println();
 
-            while(!currentQueue.isEmpty()) {
-                // Say we are at B and our Q=[CD]
-                Vertex currentVertex = currentQueue.remove();
-                //exploreBFS(paths, localPath, currentVertex);
+            ArrayList<Vertex> neighbors = currentVertex.getNeighbors();
+            // Each neighbor is a new path.
+            for (Vertex neighbor : neighbors) {
+                // If the neighbor is not in the current path make a new path and add to queue
+                if(!localPath.currentPath.contains(neighbor)) {
+                    Path newPath = new Path(localPath);
+                    newPath.add(neighbor);
+                    paths.add(newPath);
+                    Pair<Path, Vertex> newPair = new Pair<Path, Vertex>();
+                    newPair.first = newPath;
+                    newPair.second = neighbor;
 
-                if(currentQueue.isEmpty()) {
-                    Path childPath = new Path(localPath);
-                    childPath.add(currentVertex);
-                    paths.add(childPath);
+                    toVisit.add(newPair);
                 }
-
-                //localPath.add(currentVertex);
-                // Now we must get the permutations of CD
-                ArrayList<Vertex> nextPermutation = new ArrayList<Vertex>(currentQueue);
-
-                // This is basically an entire new queue we need to explore
-                // New permutations [[CD], [DC]]
-                ArrayList<ArrayList<Vertex>> permutations = generatePermutations(nextPermutation);
-
-
-
-                // Add permutation to queue
-                for (ArrayList<Vertex> permutation : permutations) {
-                    Pair<Path, Queue<Vertex>> newPair = new Pair<Path, Queue<Vertex>>();
-                    Queue<Vertex> nextToVisit = new LinkedList<Vertex>();
-
-                    for (Vertex child : permutation) {
-                        nextToVisit.add(child);
-                        Path childPath = new Path(localPath);
-                        childPath.add(currentVertex);
-                        paths.add(childPath);
-            
-                        newPair.first = childPath;
-                        newPair.second = nextToVisit;
-                    }
-                    queuesToVisit.add(newPair);
-                }
-
             }
-            //paths.remove(localPath);
         }
 
         ArrayList<Path> finalPaths = new ArrayList<Path>();
@@ -360,7 +324,7 @@ class Project1 {
             }
         }
 
-        bestPath = finalPaths.get(0);
+        Path bestPath = finalPaths.get(0);
 
         for (Path path : finalPaths) {
             if((bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)) > (path.getTotalDistance() + path.getLastAdded().getDistanceTo(start))) {
