@@ -2,10 +2,11 @@ import java.util.ArrayList;
 
 class Graph {
     private ArrayList<Vertex> vertices;
-	private int numOfEdges;
+    private ArrayList<Edge> edges;
 
     public Graph() {
         this.vertices = new ArrayList<Vertex>();
+        this.edges = new ArrayList<Edge>();
     }
 
     // For each new vertex we need to add a new edge to all prexisting vertices.
@@ -21,8 +22,54 @@ class Graph {
                 // And we dont have an edge like this
                 if(vA != vB && !vA.hasEdgeTo(vB)) {
                     Edge e = new Edge(getDistance(vA, vB), vA, vB);
+                    edges.add(e);
                 }
             }
+        }
+    }
+
+    public void AddManualVertex(Edge e) {
+        Vertex a = new Vertex(e.getVertexA().getName(), e.getVertexA().getCoordinates().getX(), e.getVertexA().getCoordinates().getY());
+        Vertex b = new Vertex(e.getVertexB().getName(), e.getVertexB().getCoordinates().getX(), e.getVertexB().getCoordinates().getY());
+
+        boolean containsA = false;
+        for (Vertex v : this.vertices) {
+            if(v.getName() == a.getName()) {
+                containsA = true;
+                a = v;
+                break;
+            }
+        }
+        if(!containsA) {
+            this.vertices.add(a);
+        }
+
+        boolean containsB = false;
+        for (Vertex v : this.vertices) {
+            if(v.getName() == b.getName()) {
+                containsB = true;
+                b = v;
+                break;
+            }
+        }
+        if(!containsB) {
+            this.vertices.add(b);
+        }
+
+        boolean edgeExisits = false;
+
+        for (Edge origE : this.edges) {
+            if(origE.getVertexA() == a && origE.getVertexB() == b) {
+                // we already have such an edge
+                System.out.println("WE ALREADY HAVE THIS EDGE!");
+                edgeExisits = true;
+                break;
+            }
+        }
+
+        if(!edgeExisits) {
+            Edge newEdge = new Edge(getDistance(a, b), a, b);
+            this.edges.add(newEdge);
         }
     }
 
@@ -40,5 +87,20 @@ class Graph {
 
     public ArrayList<Vertex> getVertices() {
         return this.vertices;
+    }
+
+    public ArrayList<Edge> getEdges() {
+        return this.edges;
+    }
+
+    public Vertex getStartingVertex() {
+        Vertex start = this.vertices.get(0);
+        for (Vertex v : this.vertices) {
+            if(v.getName().trim().compareTo("1") == 0) {
+                return v;
+            }
+        }
+
+        return start;
     }
 }

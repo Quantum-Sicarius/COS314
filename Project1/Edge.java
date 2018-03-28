@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-class Edge {
+class Edge{
     private Vertex vertexA;
     private Vertex vertexB;
     private double distance;
@@ -25,4 +25,11 @@ class Edge {
     public double getDistance() {
         return this.distance;
     }
+
+    /*@Override
+    public int compareTo(Edge compareEdge) {
+        int compareDistance=((Edge)compareEdge).getDistance();
+        /* For Ascending order
+        return this.getDistance()-compareDistance;
+    /*}*/
 }
