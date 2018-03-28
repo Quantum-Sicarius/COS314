@@ -1,3 +1,5 @@
+package scholtz.thomas.project1;
+
 class City {
     private String name;
     private double x;

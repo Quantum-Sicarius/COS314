@@ -1,23 +1,24 @@
+package scholtz.thomas.project1;
+
 import java.nio.*;
 import java.util.*;
-import java.math.BigInteger;
 
-class Project1 {
+class Project {
     private String fileToRead;
     private Integer searchMethod;
 
     private Graph g;
 
-    public Project1() {
+    public Project() {
         System.out.println("Starting:");
-        System.out.println("============================");
+        System.out.println("===============================");
         System.out.println("Select problem:");
         System.out.println("1) wi29");
         System.out.println("2) dj38");
         System.out.println("3) eil51");
         System.out.println("4) small");
         System.out.println("5) other file");
-        System.out.println("============================\n");
+        System.out.println("===============================\n");
 
         Scanner sc = new Scanner(System.in);
         int value = 0;
@@ -26,23 +27,31 @@ class Project1 {
         }
         
         if(value == 1) {
-            System.out.println("You selected option 1!");
+            System.out.println("You selected option wi29!");
             this.fileToRead = "wi29.tsp";
             printProblemSearchMethod();
 
         } else if (value == 2) {
-            System.out.println("You selected option 2!");
+            System.out.println("You selected option dj38!");
             this.fileToRead = "dj38.tsp";
             printProblemSearchMethod();
 
         } else if (value == 3) {
-            System.out.println("You selected option 3!");
+            System.out.println("You selected option eil51!");
             this.fileToRead = "eil51.tsp";
             printProblemSearchMethod();
 
         } else if (value == 4) {
-            System.out.println("You selected option 4!");
+            System.out.println("You selected option small!");
             this.fileToRead = "small.tsp";
+            printProblemSearchMethod();
+    
+        } else if (value == 5) {
+            System.out.println("You selected option other!");
+            System.out.println("Enter file name (exapmle.tsp): ");
+
+            String otherFileName = sc.next().trim();
+            this.fileToRead = otherFileName;
             printProblemSearchMethod();
     
         } else {
@@ -52,12 +61,12 @@ class Project1 {
     }
 
     private void printProblemSearchMethod() {
-        System.out.println("\n============================");
+        System.out.println("\n===============================");
         System.out.println("Select search method:");
         System.out.println("1) Depth first search with iterative deepening");
         System.out.println("2) Breadth first search");
         System.out.println("3) A* Algorithm");
-        System.out.println("============================\n");
+        System.out.println("===============================\n");
 
         Scanner sc = new Scanner(System.in);
         int value = 0;
@@ -103,6 +112,15 @@ class Project1 {
         System.out.println("Starting search!");
 
         if(searchMethod == 1) {
+            if(!memoryCheck()) {
+                System.out.println("Do you want to continue? [Y/n]");
+                Scanner sc = new Scanner(System.in);
+                String value = "";
+                value = sc.next();
+                if(value.trim().toUpperCase().compareTo("Y") != 0) {
+                    return;
+                }
+            }
             long startTime = System.nanoTime();
             depthFirstSearchWithIterativeDeepening();
             long endTime = System.nanoTime();
@@ -111,6 +129,15 @@ class Project1 {
             System.out.println("Algorithm took: " + duration + " milliseconds!");
         }
         else if(searchMethod == 2) {
+            if(!memoryCheck()) {
+                System.out.println("Do you want to continue? [Y/n]");
+                Scanner sc = new Scanner(System.in);
+                String value = "";
+                value = sc.next();
+                if(value.trim().toUpperCase().compareTo("Y") != 0) {
+                    return;
+                }
+            }
             long startTime = System.nanoTime();
             breadthFirstSearch();
             long endTime = System.nanoTime();
@@ -128,14 +155,50 @@ class Project1 {
         }
     }
 
+    private static long factorial(int number) {
+        long result = 1;
+
+        for (int factor = 2; factor <= number; factor++) {
+            result *= factor;
+        }
+
+        return result;
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    private boolean memoryCheck() {
+        // In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes.
+        Long estimatedBytes = (factorial(g.getVertices().size() - 1) * (16+8) * (16));
+        Long available = (Runtime.getRuntime().maxMemory());
+        
+        if(estimatedBytes < 0 || estimatedBytes > available) {
+            System.out.println("==============================================================");
+            System.out.println("You are attempting a exhuastive search with too little memory!"); 
+            System.out.println("In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes."); 
+            System.out.println("Considering my not so memory efficient implemmentation you will run out of memory and crash!"); 
+            System.out.println("You will be attempting to use over: " + humanReadableByteCount(Math.abs(estimatedBytes), false)); 
+            System.out.println("The JVM only has: " + humanReadableByteCount(Runtime.getRuntime().maxMemory(), false) + " available for this program!"); 
+            System.out.println("==============================================================");
+
+            return false;
+        }
+
+        return true;
+    }
+
     private ArrayList<Path> depthFirstSearch(Vertex start,int depthLimit) {
         if( depthLimit == 0) {
             return null;
         }
 
         // We know our goal is our starting position so all we actually want to do is go through all our nodes.
-        int currentDepth = 0;
-
         Deque<Pair<Path, Vertex>> toVisit = new LinkedList<Pair<Path, Vertex>>();
 
         ArrayList<Path> paths = new ArrayList<Path>();
@@ -214,8 +277,8 @@ class Project1 {
                         bestPath = sol;
                     }
                 }
-                System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + (bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)));
-
+                System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + Math.round((bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start))));
+                System.out.println();
                 break;
             } else {
                 System.out.println("No solutions have been found yet! Depth = " + i);
@@ -224,62 +287,7 @@ class Project1 {
 
     }
 
-    private ArrayList<ArrayList<Vertex>> generatePermutations(ArrayList<Vertex> list) {
-        ArrayList<ArrayList<Vertex>> perm = new ArrayList<ArrayList<Vertex>>();
-
-        // Add base combination.
-        for (int i = 0; i < list.size(); i++) {
-            Collections.rotate(list, 1);
-            ArrayList<Vertex> newlist = new ArrayList<Vertex>(list);
-            perm.add(newlist);
-        }
-
-        return perm;
-    }
-
-    private static long factorial(int number) {
-        long result = 1;
-
-        for (int factor = 2; factor <= number; factor++) {
-            result *= factor;
-        }
-
-        return result;
-    }
-
-    private static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
-    }
-
-    private boolean memoryCheck() {
-        // In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes.
-        Long estimatedBytes = (factorial(g.getVertices().size() - 1) * (16+8) * (16));
-        Long available = (Runtime.getRuntime().maxMemory());
-        
-        if(estimatedBytes < 0 || estimatedBytes > available) {
-            System.out.println("==============================================================");
-            System.out.println("You are attempting a exhuastive search with too little memory!"); 
-            System.out.println("In a modern 64-bit JDK, an object has a 12-byte header, padded to a multiple of 8 bytes, so the minimum object size is 16 bytes."); 
-            System.out.println("Considering my not so memory efficient implemmentation you will run out of memory and crash!"); 
-            System.out.println("You will be attempting to use over: " + humanReadableByteCount(Math.abs(estimatedBytes), false)); 
-            System.out.println("The JVM only has: " + humanReadableByteCount(Runtime.getRuntime().maxMemory(), false) + " available for this program!"); 
-            System.out.println("==============================================================");
-
-            return false;
-        }
-
-        return true;
-    }
-
     private void breadthFirstSearch() {
-        if(!memoryCheck()) {
-            return;
-        }
-
         /*
         A - B
         | \ |
@@ -351,7 +359,7 @@ class Project1 {
 
         System.out.println();
         System.out.println("Totals potential solutions: " + finalPaths.size());
-        System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + (bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)));
+        System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + Math.round((bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start))));
         System.out.println();
     }
 
@@ -407,8 +415,6 @@ class Project1 {
         return S
          */
 
-        //System.out.println("There are " + unvisited.size() + " vertices unvisisted!");
-
         Graph subGraph = new Graph();
 
         ArrayList<Edge> sortedEdges = new ArrayList<Edge>();
@@ -422,8 +428,6 @@ class Project1 {
                 }
             }
         }
-
-        //System.out.println("Number of sorted edges: " + sortedEdges.size());
 
         Collections.sort(sortedEdges, new Comparator<Edge>() {
             @Override
@@ -482,8 +486,7 @@ class Project1 {
             heuristicDistance += e.getDistance();
         }
 
-        System.out.println("Heuristic distance: " + heuristicDistance);
-
+        //System.out.println("Heuristic distance: " + heuristicDistance);
 
         return heuristicDistance;
     }
@@ -520,22 +523,13 @@ class Project1 {
             Vertex bestNext = neighbors.get(0);
 
             double MSTHeuristic = getMSTDistanceOfUnvisisted(unvisited);
-            double NearestDistanceUnvisitedToStart = Double.POSITIVE_INFINITY;
-            double NearestCity = Double.POSITIVE_INFINITY;
-
-            for (Vertex neighbor : neighbors) {
-                if (!localPath.currentPath.contains(neighbor)) {
-                    if(curVertex.getDistanceTo(neighbor) < NearestCity) {
-                        NearestCity = curVertex.getDistanceTo(neighbor);
-                    }
-                    if(neighbor.getDistanceTo(start) < NearestDistanceUnvisitedToStart) {
-                        NearestDistanceUnvisitedToStart = neighbor.getDistanceTo(start);
-                    }
-                }
-            }
 
             double bestHeuristicDistance = Double.POSITIVE_INFINITY;
             //System.out.println("Best Heuristic Distance: " + bestHeuristicDistance);
+
+            /*
+                Here we need to simulate each node and get their h(n) value
+            */
 
             for (Vertex neighbor : neighbors) {
                 if (!localPath.currentPath.contains(neighbor)) {
@@ -544,11 +538,25 @@ class Project1 {
                     // h(n): distance to the nearest unvisited city from the current city 
                     // + estimated distance to travel all the unvisited cities (MST heuristic used here) 
                     // + nearest distance from an unvisited city to the start city.
+                    double NearestDistanceUnvisitedToStart = Double.POSITIVE_INFINITY;
 
-                    double heuristic = curVertex.getDistanceTo(neighbor) + MSTHeuristic;// + NearestDistanceUnvisitedToStart;
+                    ArrayList<Vertex> tempUnvisited = new ArrayList<Vertex>();
+                    for (Vertex temp : unvisited) {
+                        if(temp != neighbor) {
+                            tempUnvisited.add(temp);
+                        }
+                    }
+
+                    for (Vertex v : tempUnvisited) {
+                        if(NearestDistanceUnvisitedToStart > v.getDistanceTo(start)) {
+                            NearestDistanceUnvisitedToStart = v.getDistanceTo(start);
+                        }
+                    }
+
+                    double heuristic = curVertex.getDistanceTo(neighbor) + MSTHeuristic + NearestDistanceUnvisitedToStart;
 
                     if (heuristic <= bestHeuristicDistance) {
-                        System.out.println("Better neighbor found " + heuristic + " Neighbor: " + neighbor.getName());
+                        //System.out.println("Better neighbor found " + heuristic + " Neighbor: " + neighbor.getName());
                         bestHeuristicDistance = heuristic;
                         bestNext = neighbor;
                     }
@@ -589,7 +597,7 @@ class Project1 {
 
         System.out.println();
         System.out.println("Totals potential solutions: " + finalPaths.size());
-        System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + (bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start)));
+        System.out.println("Best solution: " + bestPath + start.getName() + " with a distance of: " + Math.round((bestPath.getTotalDistance() + bestPath.getLastAdded().getDistanceTo(start))));
         System.out.println();
     }
 }

@@ -1,3 +1,5 @@
+package scholtz.thomas.project1;
+
 import java.util.ArrayList;
 
 class Graph {

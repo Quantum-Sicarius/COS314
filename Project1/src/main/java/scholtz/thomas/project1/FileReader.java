@@ -1,3 +1,5 @@
+package scholtz.thomas.project1;
+
 import java.nio.*;
 import java.io.*;
 import java.nio.file.Files;
