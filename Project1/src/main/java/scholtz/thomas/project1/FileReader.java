@@ -21,7 +21,7 @@ class FileReader {
         System.out.println("Attempting to read file: " + fileName);
         String content = "";
         try {
-            content = new String(Files.readAllBytes(Paths.get(fileName)));
+            content = new String(Files.readAllBytes(Paths.get("./" + fileName)));
         } catch(IOException e) {
             e.printStackTrace();
         }
