@@ -280,8 +280,8 @@
     
 
     
-    \hypertarget{experiment-1}{%
-\section{Experiment 1}\label{experiment-1}}
+    \hypertarget{cos-314---project-2}{%
+\section{COS 314 - Project 2}\label{cos-314---project-2}}
 
 \begin{longtable}[]{@{}lll@{}}
 \toprule
@@ -292,6 +292,45 @@ Student nmr & Name & Date\tabularnewline
 \bottomrule
 \end{longtable}
 
+\hypertarget{requirements}{%
+\subsection{Requirements}\label{requirements}}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://docs.python.org/3/}{Python3}
+\item
+  \href{http://www.numpy.org/}{numpy}
+\end{itemize}
+
+\hypertarget{installation}{%
+\subsubsection{Installation}\label{installation}}
+
+\hypertarget{ubuntu}{%
+\paragraph{Ubuntu}\label{ubuntu}}
+
+\begin{verbatim}
+sudo apt-get install python3
+sudo apt-get install python3-pip  
+pip install numpy
+\end{verbatim}
+
+For convinience I added a makefile entry \texttt{make\ install} which
+should install the pip versions of the required libraries.
+
+\hypertarget{optional-dependencies}{%
+\subsubsection{Optional Dependencies}\label{optional-dependencies}}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://matplotlib.org/}{matplotlib}
+\end{itemize}
+
+\begin{verbatim}
+python -mpip install matplotlib
+\end{verbatim}
+
 \hypertarget{introduction}{%
 \subsection{Introduction}\label{introduction}}
 
@@ -301,13 +340,29 @@ images. The experiments were done in reverse order (3 to 1) as the first
 problem, because of that I concluded that 100 hidden units give me the
 best balance of performance and generalization.
 
-    \hypertarget{data-preprocessing}{%
+\hypertarget{running}{%
+\subsection{Running}\label{running}}
+
+To run the experiments you can execute \texttt{make\ run} which will run
+all 3 experiments training each one.
+
+    \hypertarget{experiment-1}{%
+\section{Experiment 1}\label{experiment-1}}
+
+To run experiment 1: \texttt{python\ experiment1.py\ B} Where \texttt{B}
+is the character to recognise.
+
+\hypertarget{data-preprocessing}{%
 \subsection{Data preprocessing}\label{data-preprocessing}}
 
 \hypertarget{numerical-preprocessing}{%
 \subsubsection{Numerical preprocessing}\label{numerical-preprocessing}}
 
-For numerical values the data was normalised to {[}0-1{]}.
+For numerical values the data was normalised to {[}0-1{]}. (Min-max
+normalization). The reason behind doing min-max normalization is the
+smaller values values improve learning rate as the sigmoid activation
+function will output values closer to one (1) for most of the values. Eg
+sigmoid(2)=0.88079707797788.
 
 \begin{verbatim}
 Example Numerical preprocessing
@@ -332,8 +387,8 @@ Scaled: 8   to: 0.5333333333333333
 \hypertarget{character-preprocessing}{%
 \subsubsection{Character preprocessing}\label{character-preprocessing}}
 
-For the characters the data was first converted to lower case, then
-ascii number and finally 97 was subtracted.
+For the characters the data was first converted to lower case, then to
+the ascii number and finally 97 was subtracted.
 
 \begin{verbatim}
 Example character preprocessing
@@ -664,7 +719,8 @@ Student nmr & Name & Date\tabularnewline
 \hypertarget{numerical-preprocessing}{%
 \subsubsection{Numerical preprocessing}\label{numerical-preprocessing}}
 
-For numerical values the data was normalised to {[}0-1{]}.
+For numerical values the data was normalised to {[}0-1{]}. (Min-max
+normalization).
 
 \begin{verbatim}
 Example Numerical preprocessing
@@ -689,8 +745,8 @@ Scaled: 8   to: 0.5333333333333333
 \hypertarget{character-preprocessing}{%
 \subsubsection{Character preprocessing}\label{character-preprocessing}}
 
-For the characters the data was first converted to lower case, then
-ascii number and finally 97 was subtracted.
+For the characters the data was first converted to lower case, then to
+the ascii number and finally 97 was subtracted.
 
 \begin{verbatim}
 Example character preprocessing
@@ -1060,13 +1116,14 @@ Student nmr & Name & Date\tabularnewline
 \hypertarget{numerical-preprocessing}{%
 \paragraph{Numerical preprocessing}\label{numerical-preprocessing}}
 
-For numerical values the data was normalised to {[}0-1{]}.
+For numerical values the data was normalised to {[}0-1{]}. (Min-max
+normalization).
 
 \hypertarget{character-preprocessing}{%
 \paragraph{Character preprocessing}\label{character-preprocessing}}
 
-For the characters the data was first converted to lower case, then
-ascii number and finally 97 was subtracted.
+For the characters the data was first converted to lower case, then to
+the ascii number and finally 97 was subtracted.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}15}]:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Example Numerical preprocessing}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}

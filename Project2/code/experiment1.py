@@ -576,7 +576,11 @@ def tests():
 
 
 if __name__ == "__main__":
-    _character_match = input("Enter character to train on: ")
+    print("Number of arguments: " + str(len(sys.argv)))
+
+    #_character_match = input("Enter character to train on: ")
+    _character_match = sys.argv[1]
+    print("Character argument: " + _character_match)
 
     characters = readData()
 

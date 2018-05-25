@@ -18,6 +18,8 @@ if found_matplotlib:
     import matplotlib.pyplot as plt
 
 # Sigmoid
+
+
 def nonlin(result, deriv=False):
     if(deriv):
         return result * (1 - result)
@@ -189,6 +191,9 @@ class NeuralNetwork:
         self.stats_error = []
         self.stats_success = []
 
+        self.stats_error_epoch = []
+        self.stats_success_epoch = []
+        
         np.random.seed(1)
         # Random weights
         # 1/sqrt(fanin) seems to perform worse than [0,1] normal distribution
@@ -210,17 +215,48 @@ class NeuralNetwork:
         result = arr.argmax()
         expected = expectedarr.argmax(axis=0)
 
-        print("Got: " + chr(result + 97).upper() +
-              " Expected: " + chr(expected + 97).upper())
+        print("Predicted (" + str(result) + "): " + chr(result + 97).upper() +
+              " Expected (" + str(expected) + "): " + chr(expected + 97).upper())
 
+    def _scale(self, num):
+        new_min = 0
+        new_max = 1
+
+        new_value = ((num - 0) / (15 - 0)) * (new_max - new_min) + new_min
+        return new_value
+
+    # Manual single prediction
     def predict(self, input, answer):
-        print("Predict: ")
+        input_arr = np.array([self._scale(input[0]),
+                              self._scale(input[1]),
+                              self._scale(input[2]),
+                              self._scale(input[3]),
+                              self._scale(input[4]),
+                              self._scale(input[5]),
+                              self._scale(input[6]),
+                              self._scale(input[7]),
+                              self._scale(input[8]),
+                              self._scale(input[9]),
+                              self._scale(input[10]),
+                              self._scale(input[11]),
+                              self._scale(input[12]),
+                              self._scale(input[13]),
+                              self._scale(input[14]),
+                              self._scale(input[15]),
+                              1])
 
-        l0 = input
+        l0 = input_arr
         l1 = nonlin(np.dot(l0, self.syn0))
         l2 = nonlin(np.dot(l1, self.syn1))
 
-        self._convertToChar(l2, answer)
+        answer = (ord(answer.lower()) - 97)
+
+        answer_arr = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+        answer_arr[answer] = 1
+
+        self._convertToChar(l2, answer_arr)
 
     def validate(self, input_values, answer_values):
         print("Validation: ")
@@ -350,48 +386,62 @@ class NeuralNetwork:
             self.training_success_percentage = np.round(correct /
                                                         total *
                                                         100, decimals=3)
+            self.training_success_percentage = np.round(correct /
+                                                        total *
+                                                        100, decimals=3)
 
+            if np.round(correct / total * 100) == 100:
+                break
+
+            self.stats_error_epoch.append(self.training_error)
+            self.stats_success_epoch.append(self.training_success_percentage)
 
 def tests():
     if not matplot_lib:
         print("Matplotlib is required to run tests")
         return
 
-    epochs = 120
-    best_error = 1000
-    best_nn = -1
+    epochs = 10
+    hidden_units = 150
+
+    best_success = -1
+    best_nn = None
+
     # Increasing hidden units by 10
     for x in range(1):
         x = 150
         if (x % 10 == 0 and x != 0):
-            print("Testing with " + str(x) + " hidden units...")
+            momentum = 0.001
+            learning_rate = 1
             nn = NeuralNetwork(
                 training_input_values,
                 training_answer_values,
                 num_epochs=epochs,
-                hidden_units=x)
+                hidden_units=hidden_units,
+                momentum=momentum,
+                learning_rate=learning_rate)
             nn.train()
             nn.validate(test_input, test_answers)
             nn.printStats()
 
             a = plt.subplot(2, 1, 1)
-            plt.plot(nn.stats_success, '.-', label=str(x))
+            plt.plot(nn.stats_success, '.-', label=str(hidden_units))
             plt.ylabel('Percentage success')
-            plt.title(
-                'NN ' +
-                str(epochs) +
-                ' Epochs - ' +
-                str(x) +
-                ' Hiddenunits')
+            plt.title('Epochs: ' +
+                      str(nn.num_epochs) +
+                      ' Hidden units: ' +
+                      str(nn.hidden_units) +
+                      ' Momentum: ' +
+                      str(nn.momentum) +
+                      ' LearningR: ' +
+                      str(nn.learning_rate))
             plt.ylim([0, 100])
             plt.legend(loc=4)
-
-            print(str(len(nn.stats_success)))
 
             y_mean = [np.mean(nn.stats_error)] * len(nn.stats_error)
 
             b = plt.subplot(2, 1, 2)
-            plt.plot(nn.stats_error, '-', label=str(x))
+            plt.plot(nn.stats_error, '-', label=str(hidden_units))
             plt.plot(y_mean, 'g', linestyle='--')
             plt.ylabel('Error rate')
             plt.xlabel('Training iterations in thousands')
@@ -399,19 +449,61 @@ def tests():
             plt.legend()
 
             plt.savefig(
-                'NN_' +
+                'E2_NN_Training_Momentum_' +
+                str(momentum) +
+                '_' +
                 str(epochs) +
                 'Epochs_' +
-                str(x) +
-                'Hiddenunits.png')
+                str(hidden_units) +
+                '_LR_' +
+                str(learning_rate) +
+                '_Hiddenunits.png')
             plt.clf()
 
-            if nn.training_success_percentage < best_error:
-                print("New best NN: " + str(x))
-                best_error = nn.training_success_percentage
+            a = plt.subplot(2, 1, 1)
+            plt.plot(nn.stats_success_epoch, '.-', label=str(hidden_units))
+            plt.ylabel('Percentage success')
+            plt.title('Epochs: ' +
+                      str(nn.num_epochs) +
+                      ' Hidden units: ' +
+                      str(nn.hidden_units) +
+                      ' Momentum: ' +
+                      str(nn.momentum) +
+                      ' LearningR: ' +
+                      str(nn.learning_rate))
+            plt.ylim([0, 100])
+            plt.legend(loc=4)
+
+            y_mean = [np.mean(nn.stats_error_epoch)] * \
+                len(nn.stats_error_epoch)
+
+            b = plt.subplot(2, 1, 2)
+            plt.plot(nn.stats_error_epoch, '-', label=str(hidden_units))
+            plt.plot(y_mean, 'g', linestyle='--')
+            plt.ylabel('Error rate')
+            plt.xlabel('Epochs')
+
+            plt.legend()
+
+            plt.savefig(
+                'E2_NN_Epoch_Momentum_' +
+                str(momentum) +
+                '_' +
+                str(epochs) +
+                'Epochs_' +
+                str(hidden_units) +
+                '_LR_' +
+                str(learning_rate) +
+                '_Hiddenunits.png')
+            plt.clf()
+
+            if nn.training_success_percentage > best_success:
+                best_success = nn.training_success_percentage
                 best_nn = nn
+                print("New best")
             else:
-                print("Current best: " + str(x))
+                print("This NN is still best:")
+                best_nn.printStats()
 
         if (x % 50 == 0 and x != 0):
             plt.savefig(
@@ -426,7 +518,21 @@ def tests():
     best_nn.printStats()
 
     print("Manual test:")
-    best_nn.predict([2,1,2,2,1,6,8,7,7,8,7,12,1,9,4,10],[2])
+    best_nn.predict(
+        np.array([8, 11, 11, 8, 5, 7, 8, 3, 5, 10, 6, 7, 7, 7, 2, 7]), 'N')
+    best_nn.predict(
+        np.array([4, 8, 4, 6, 4, 7, 7, 12, 1, 7, 6, 8, 3, 8, 0, 8]), 'H')
+    best_nn.predict(
+        np.array([3, 6, 4, 4, 3, 5, 10, 3, 4, 12, 8, 6, 2, 10, 1, 7]), 'F')
+
+    # Outside training set
+    best_nn.predict(
+        np.array([2, 3, 4, 2, 1, 8, 7, 2, 6, 10, 6, 8, 1, 9, 5, 8]), 'S')
+    best_nn.predict(
+        np.array([6, 9, 6, 7, 5, 6, 11, 3, 7, 11, 9, 5, 2, 12, 2, 4]), 'T')
+    best_nn.predict(
+        np.array([2, 11, 3, 8, 2, 15, 4, 4, 5, 13, 1, 8, 0, 7, 0, 8]), 'J')
+
 
 if __name__ == "__main__":
 
@@ -436,7 +542,7 @@ if __name__ == "__main__":
     training_answer_values = np.array(characters[0].getNPAnswerArray())
 
     # How much training data do we want?
-    limit = 16000
+    limit = 18000
     _count = 1
 
     # Training set
