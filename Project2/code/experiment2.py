@@ -1,5 +1,21 @@
+import importlib
+import sys
+
+numpy_lib = importlib.util.find_spec("numpy")
+found_numpy = numpy_lib is not None
+if found_numpy:
+    print("Numpy is installed!")
+else:
+    print("Numpy is required to run this program!")
+    sys.exit(1)
+
 import numpy as np
-import matplotlib.pyplot as plt
+
+matplot_lib = importlib.util.find_spec("matplotlib")
+found_matplotlib = matplot_lib is not None
+if found_matplotlib:
+    print("matplotlib is installed!")
+    import matplotlib.pyplot as plt
 
 # Sigmoid
 
@@ -342,50 +358,11 @@ class NeuralNetwork:
             self.stats_success_epoch.append(self.training_success_percentage)
 
 
-if __name__ == "__main__":
+def tests():
+    if not matplot_lib:
+        print("Matplotlib is required to run tests")
+        return
 
-    characters = readData()
-
-    training_input_values = np.array(characters[0].getNPDataArray())
-    training_answer_values = np.array(characters[0].getNPAnswerArray())
-
-    # How much training data do we want?
-    limit = 18000
-    _count = 1
-
-    # Training set
-    for character in characters:
-        _count = _count + 1
-        training_input_values = np.append(
-            training_input_values,
-            character.getNPDataArray(),
-            axis=0)
-        training_answer_values = np.append(
-            training_answer_values,
-            character.getNPAnswerArray(),
-            axis=0)
-        if _count >= limit:
-            break
-
-    # Validation set
-    test_input = np.array(characters[limit].getNPDataArray())
-    test_answers = np.array(characters[limit].getNPAnswerArray())
-
-    for i in range(limit, 20000):
-        test_input = np.append(
-            test_input,
-            characters[i].getNPDataArray(),
-            axis=0)
-        test_answers = np.append(
-            test_answers,
-            characters[i].getNPAnswerArray(),
-            axis=0)
-
-    print("Input values matrix: " + str(training_input_values.shape))
-    print("Answers values matrix:" + str(training_answer_values.shape))
-    print("Starting...")
-
-    # Tests
     epochs = 30
     hidden_units = 100
 
@@ -487,3 +464,50 @@ if __name__ == "__main__":
         else:
             print("This NN is still best:")
             best_nn.printStats()
+
+
+if __name__ == "__main__":
+
+    characters = readData()
+
+    training_input_values = np.array(characters[0].getNPDataArray())
+    training_answer_values = np.array(characters[0].getNPAnswerArray())
+
+    # How much training data do we want?
+    limit = 18000
+    _count = 1
+
+    # Training set
+    for character in characters:
+        _count = _count + 1
+        training_input_values = np.append(
+            training_input_values,
+            character.getNPDataArray(),
+            axis=0)
+        training_answer_values = np.append(
+            training_answer_values,
+            character.getNPAnswerArray(),
+            axis=0)
+        if _count >= limit:
+            break
+
+    # Validation set
+    test_input = np.array(characters[limit].getNPDataArray())
+    test_answers = np.array(characters[limit].getNPAnswerArray())
+
+    for i in range(limit, 20000):
+        test_input = np.append(
+            test_input,
+            characters[i].getNPDataArray(),
+            axis=0)
+        test_answers = np.append(
+            test_answers,
+            characters[i].getNPAnswerArray(),
+            axis=0)
+
+    print("Input values matrix: " + str(training_input_values.shape))
+    print("Answers values matrix:" + str(training_answer_values.shape))
+    print("Starting...")
+
+    # Tests
+    tests()

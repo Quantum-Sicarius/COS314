@@ -1,10 +1,28 @@
+import importlib
+import sys
+
+numpy_lib = importlib.util.find_spec("numpy")
+found_numpy = numpy_lib is not None
+if found_numpy:
+    print("Numpy is installed!")
+else:
+    print("Numpy is required to run this program!")
+    sys.exit(1)
+
 import numpy as np
-import matplotlib.pyplot as plt
+
+matplot_lib = importlib.util.find_spec("matplotlib")
+found_matplotlib = matplot_lib is not None
+if found_matplotlib:
+    print("matplotlib is installed!")
+    import matplotlib.pyplot as plt
 
 # This is what we want to recognise
-_character_match = 'Z'
+_character_match = 'A'
 
 # Sigmoid
+
+
 def nonlin(result, deriv=False):
     if(deriv):
         return result * (1 - result)
@@ -149,7 +167,7 @@ class Character:
     def getNPAnswerArray(self):
         # Char
         arr = np.array([[0]])
-
+        # print(_character_match)
         if self.lettr in _character_match:
             arr[0][0] = 1
         return arr
@@ -343,61 +361,29 @@ class NeuralNetwork:
             self.stats_success_epoch.append(self.training_success_percentage)
 
 
-if __name__ == "__main__":
-
-    characters = readData()
-
-    training_input_values = np.array(characters[0].getNPDataArray())
-    training_answer_values = np.array(characters[0].getNPAnswerArray())
-
-    # How much training data do we want?
-    limit = 18000
-    _count = 1
-
-    # Training set
-    for character in characters:
-        _count = _count + 1
-        training_input_values = np.append(
-            training_input_values,
-            character.getNPDataArray(),
-            axis=0)
-        training_answer_values = np.append(
-            training_answer_values,
-            character.getNPAnswerArray(),
-            axis=0)
-        if _count >= limit:
-            break
-
-    # Validation set
-    test_input = np.array(characters[limit].getNPDataArray())
-    test_answers = np.array(characters[limit].getNPAnswerArray())
-
-    for i in range(limit, 20000):
-        test_input = np.append(
-            test_input,
-            characters[i].getNPDataArray(),
-            axis=0)
-        test_answers = np.append(
-            test_answers,
-            characters[i].getNPAnswerArray(),
-            axis=0)
-
-    print("Input values matrix: " + str(training_input_values.shape))
-    print("Answers values matrix:" + str(training_answer_values.shape))
-    print("Starting...")
+def tests():
+    if not matplot_lib:
+        print("Matplotlib is required to run tests")
+        return
 
     # Tests
     epochs = 30
     hidden_units = 100
 
+    # Character to use
+
     best_success = -1
     best_nn = None
 
+    # Experiments
+    # Learning rate
     for x in range(100):
-        momentum = x / 10
-        #momentum = 0.01
-        #learning_rate = x / 10
-        learning_rate = 0.9
+        #momentum = x / 10
+        momentum = 0.01
+        learning_rate = x / 10
+        if learning_rate == 1:
+            break
+        #learning_rate = 0.9
 
         nn = NeuralNetwork(
             training_input_values,
@@ -489,3 +475,149 @@ if __name__ == "__main__":
         else:
             print("This NN is still best:")
             best_nn.printStats()
+
+    # Momentum
+    for x in range(100):
+        momentum = x / 10
+        learning_rate = 0.9
+        if momentum == 1:
+            break
+
+        nn = NeuralNetwork(
+            training_input_values,
+            training_answer_values,
+            num_epochs=epochs,
+            hidden_units=hidden_units,
+            momentum=momentum,
+            learning_rate=learning_rate)
+        nn.train()
+        nn.validate(test_input, test_answers)
+        nn.printStats()
+
+        a = plt.subplot(2, 1, 1)
+        plt.plot(nn.stats_success, '.-', label=str(hidden_units))
+        plt.ylabel('Percentage success')
+        plt.title('Epochs: ' +
+                  str(nn.num_epochs) +
+                  ' Hidden units: ' +
+                  str(nn.hidden_units) +
+                  ' Momentum: ' +
+                  str(nn.momentum) +
+                  ' LearningR: ' +
+                  str(nn.learning_rate))
+        plt.ylim([0, 100])
+        plt.legend(loc=4)
+
+        y_mean = [np.mean(nn.stats_error)] * len(nn.stats_error)
+
+        b = plt.subplot(2, 1, 2)
+        plt.plot(nn.stats_error, '-', label=str(hidden_units))
+        plt.plot(y_mean, 'g', linestyle='--')
+        plt.ylabel('Error rate')
+        plt.xlabel('Training iterations in thousands')
+
+        plt.legend()
+
+        plt.savefig(
+            'E1_NN_Training_Momentum_' +
+            str(momentum) +
+            '_' +
+            str(epochs) +
+            'Epochs_' +
+            str(hidden_units) +
+            '_LR_' +
+            str(learning_rate) +
+            '_Hiddenunits.png')
+        plt.clf()
+
+        a = plt.subplot(2, 1, 1)
+        plt.plot(nn.stats_success_epoch, '.-', label=str(hidden_units))
+        plt.ylabel('Percentage success')
+        plt.title('Epochs: ' +
+                  str(nn.num_epochs) +
+                  ' Hidden units: ' +
+                  str(nn.hidden_units) +
+                  ' Momentum: ' +
+                  str(nn.momentum) +
+                  ' LearningR: ' +
+                  str(nn.learning_rate))
+        plt.ylim([0, 100])
+        plt.legend(loc=4)
+
+        y_mean = [np.mean(nn.stats_error_epoch)] * len(nn.stats_error_epoch)
+
+        b = plt.subplot(2, 1, 2)
+        plt.plot(nn.stats_error_epoch, '-', label=str(hidden_units))
+        plt.plot(y_mean, 'g', linestyle='--')
+        plt.ylabel('Error rate')
+        plt.xlabel('Epochs')
+
+        plt.legend()
+
+        plt.savefig(
+            'E1_NN_Epoch_Momentum_' +
+            str(momentum) +
+            '_' +
+            str(epochs) +
+            'Epochs_' +
+            str(hidden_units) +
+            '_LR_' +
+            str(learning_rate) +
+            '_Hiddenunits.png')
+        plt.clf()
+
+        if nn.training_success_percentage > best_success:
+            best_success = nn.training_success_percentage
+            best_nn = nn
+            print("New best")
+        else:
+            print("This NN is still best:")
+            best_nn.printStats()
+
+
+if __name__ == "__main__":
+    _character_match = input("Enter character to train on: ")
+
+    characters = readData()
+
+    training_input_values = np.array(characters[0].getNPDataArray())
+    training_answer_values = np.array(characters[0].getNPAnswerArray())
+
+    # How much training data do we want?
+    limit = 18000
+    _count = 1
+
+    # Training set
+    for character in characters:
+        _count = _count + 1
+        training_input_values = np.append(
+            training_input_values,
+            character.getNPDataArray(),
+            axis=0)
+        training_answer_values = np.append(
+            training_answer_values,
+            character.getNPAnswerArray(),
+            axis=0)
+        if _count >= limit:
+            break
+
+    # Validation set
+    test_input = np.array(characters[limit].getNPDataArray())
+    test_answers = np.array(characters[limit].getNPAnswerArray())
+
+    for i in range(limit, 20000):
+        test_input = np.append(
+            test_input,
+            characters[i].getNPDataArray(),
+            axis=0)
+        test_answers = np.append(
+            test_answers,
+            characters[i].getNPAnswerArray(),
+            axis=0)
+
+    print("Input values matrix: " + str(training_input_values.shape))
+    print("Answers values matrix:" + str(training_answer_values.shape))
+    print("Starting...")
+
+    # tests
+    tests()
